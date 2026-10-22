@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import decimal
 import io
+import os
 import sys
 import time
 from typing import TYPE_CHECKING, Any
@@ -58,6 +59,24 @@ class CaptivateIQStream(RESTStream):
 
     records_jsonpath = "$.data[*]"
     page_size: int = 100
+
+    @override
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Honor corporate CA bundles on the Singer SDK request path.
+
+        ``requests`` applies ``REQUESTS_CA_BUNDLE``, ``CURL_CA_BUNDLE``, and
+        ``SSL_CERT_FILE`` only inside ``Session.request()``. The SDK calls
+        ``Session.send()`` directly, so those variables are ignored unless the
+        session is configured here.
+        """
+        super().__init__(*args, **kwargs)
+        ca_bundle = (
+            os.getenv("REQUESTS_CA_BUNDLE")
+            or os.getenv("CURL_CA_BUNDLE")
+            or os.getenv("SSL_CERT_FILE")
+        )
+        if ca_bundle:
+            self.requests_session.verify = ca_bundle
 
     @override
     @property

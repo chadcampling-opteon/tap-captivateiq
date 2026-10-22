@@ -25,8 +25,8 @@ SAMPLE_CONFIG = {
 
 
 def test_parse_start_date() -> None:
-    assert _parse_start_date("2025-01-15").isoformat() == "2025-01-15"
-    assert _parse_start_date("2025-01-15T12:00:00Z").isoformat() == "2025-01-15"
+    assert _parse_start_date("2025-01-15") == date(2025, 1, 15)
+    assert _parse_start_date("2025-01-15T12:00:00Z") == date(2025, 1, 15)
     assert _parse_start_date(None) is None
 
 
@@ -54,6 +54,25 @@ def test_employees_url_base() -> None:
     stream = EmployeesStream(tap)
     assert stream.url_base == "https://api.captivateiq.com"
     assert stream.path.endswith("/employees/")
+
+
+def test_stream_session_uses_corporate_ca_bundle(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("REQUESTS_CA_BUNDLE", raising=False)
+    monkeypatch.delenv("CURL_CA_BUNDLE", raising=False)
+    monkeypatch.setenv("SSL_CERT_FILE", "corp-ca.pem")
+    tap = TapCaptivateIQ(config=SAMPLE_CONFIG)
+    stream = EmployeesStream(tap)
+    assert stream.requests_session.verify == "corp-ca.pem"
+
+    monkeypatch.setenv("CURL_CA_BUNDLE", "curl-ca.pem")
+    stream = EmployeesStream(tap)
+    assert stream.requests_session.verify == "curl-ca.pem"
+
+    monkeypatch.setenv("REQUESTS_CA_BUNDLE", "requests-ca.pem")
+    stream = EmployeesStream(tap)
+    assert stream.requests_session.verify == "requests-ca.pem"
 
 
 def test_payout_summaries_dates_to_export_always_includes_latest() -> None:

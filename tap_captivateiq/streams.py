@@ -51,7 +51,7 @@ _EXPORT_FIELD_DESCRIPTIONS = {
 }
 
 # _export_payout_date is a comma-separated batch, so it stays a string.
-_EXPORT_FIELD_TYPES: dict[str, th.JSONTypeHelper] = {
+_EXPORT_FIELD_TYPES: dict[str, type[th.StringType]] = {
     "_export_payout_date": th.StringType,
     "_export_worksheet_name": th.StringType,
     "_export_report_model_id": th.StringType,
@@ -485,6 +485,7 @@ class PayoutWorksheetExportsStream(_PayoutExportStream):
     state_key = "synced_payout_worksheet_dates"
     schema = _csv_row_schema("_export_payout_date", "_export_worksheet_name")
 
+    @override
     def _extra_export_body(self) -> dict[str, Any]:
         names = self.config.get("worksheet_names") or []
         if not names:
