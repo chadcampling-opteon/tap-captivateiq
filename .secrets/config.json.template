@@ -1,0 +1,9 @@
+{
+  "auth_token": "REPLACE_ME",
+  "api_url": "https://api.captivateiq.com",
+  "start_date": "2025-01-01T00:00:00Z",
+  "request_delay_ms": 250,
+  "payout_date_lookback_days": 120,
+  "active_plans_only": true,
+  "locked_only": false
+}

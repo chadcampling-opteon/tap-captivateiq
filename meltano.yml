@@ -1,0 +1,83 @@
+send_anonymous_usage_stats: true
+project_id: "tap-captivateiq"
+default_environment: test
+requires_meltano: ">=4.0"
+environments:
+- name: test
+plugins:
+  extractors:
+  - name: "tap-captivateiq"
+    namespace: "tap_captivateiq"
+    pip_url: -e .
+    capabilities:
+    - state
+    - catalog
+    - discover
+    - about
+    - stream-maps
+    - structured-logging
+
+    select:
+    - employees.*
+    - plans.*
+    - period_groups.*
+    - payout_dates.*
+
+    settings:
+    - name: auth_token
+      label: Auth Token
+      description: CaptivateIQ API token (Authorization Token prefix)
+      sensitive: true
+    - name: api_url
+      label: API URL
+      description: CaptivateIQ API host
+    - name: start_date
+      kind: date_iso8601
+      label: Start Date
+      description: Initial date for windowed streams
+    - name: active_plans_only
+      kind: boolean
+    - name: plan_ids
+      kind: array
+    - name: period_group_ids
+      kind: array
+    - name: assumption_lookback_days
+      kind: integer
+    - name: assumption_lookahead_days
+      kind: integer
+    - name: payout_date_lookback_days
+      kind: integer
+    - name: locked_only
+      kind: boolean
+    - name: worksheet_names
+      kind: array
+    - name: report_model_type
+    - name: visualization_exports
+      kind: array
+    - name: time_series_exports
+      kind: array
+    - name: report_reprocess
+      kind: boolean
+    - name: request_delay_ms
+      kind: integer
+    - name: job_poll_seconds
+      kind: integer
+    - name: job_timeout_seconds
+      kind: integer
+
+    settings_group_validation:
+    - [auth_token]
+
+    config:
+      api_url: https://api.captivateiq.com
+      start_date: 120 days ago
+      request_delay_ms: 250
+      payout_date_lookback_days: 120
+      active_plans_only: true
+
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+    config:
+      destination_path: output
