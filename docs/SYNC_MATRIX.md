@@ -8,7 +8,7 @@
 | `plans` | Full refresh | `is_active=true` by default | 1–few pages |
 | `period_groups` | Full refresh | none | 1–few pages |
 | `employee_assumptions` | Windowed | `end_date_after` / `start_date_before` from `start_date` or lookback | pages for current window only |
-| `payout_dates` | Full refresh | none | 1 page (catalog) |
+| `payout_dates` | Full refresh | none | `ceil(n/100)` list pages. Plan payout dates (`id`, `plan`, `period_group`, `date`). Export date selection still calls `GET /ciq/v1/payouts/payout-dates/` inside the tap |
 | `payout_worksheets_catalog` | Windowed | up to 5 recent payout dates | 1 list call per date |
 | `payout_summaries` (**beta**) | Date bookmark + always latest | `synced_payout_summary_dates`; re-pull the latest open snapshot | 1 export job per ≤5 dates + poll GETs |
 | `payout_worksheet_exports` (**beta**) | Same as summaries | requires `worksheet_names` | 1 job × worksheet × date batch |

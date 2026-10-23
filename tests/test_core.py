@@ -11,6 +11,7 @@ from singer_sdk.exceptions import ConfigValidationError
 from tap_captivateiq.client import CaptivateIQPaginator
 from tap_captivateiq.streams import (
     EmployeesStream,
+    PayoutDatesStream,
     PayoutSummariesStream,
     _parse_start_date,
 )
@@ -28,6 +29,22 @@ def test_parse_start_date() -> None:
     assert _parse_start_date("2025-01-15") == date(2025, 1, 15)
     assert _parse_start_date("2025-01-15T12:00:00Z") == date(2025, 1, 15)
     assert _parse_start_date(None) is None
+
+
+def test_payout_dates_stream_is_plan_level() -> None:
+    tap = TapCaptivateIQ(config=SAMPLE_CONFIG)
+    stream = PayoutDatesStream(tap)
+    assert stream.path == "/ciq/v1/payout-dates/"
+    assert stream.primary_keys == ("id",)
+    assert set(stream.schema["properties"]) == {
+        "object",
+        "id",
+        "period_group",
+        "plan",
+        "date",
+        "created_at",
+        "updated_at",
+    }
 
 
 def test_discover_stream_names() -> None:
