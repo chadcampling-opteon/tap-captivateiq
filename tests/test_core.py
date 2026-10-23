@@ -35,7 +35,7 @@ def test_payout_dates_stream_is_plan_level() -> None:
     tap = TapCaptivateIQ(config=SAMPLE_CONFIG)
     stream = PayoutDatesStream(tap)
     assert stream.path == "/ciq/v1/payout-dates/"
-    assert list(stream.primary_keys) == ["id"]
+    assert stream.primary_keys == ("id",)
     assert set(stream.schema["properties"]) == {
         "object",
         "id",
