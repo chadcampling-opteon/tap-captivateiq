@@ -2,7 +2,7 @@
 
 Singer tap for [CaptivateIQ](https://www.captivateiq.com/) commissions data, built with the [Meltano Singer SDK](https://sdk.meltano.com/).
 
-Extracts employees, plans, period groups, employee assumptions (targets), payout snapshot catalogs/exports, and report model worksheets — including unlocked mid-period data when available (`locked_only=false`).
+Extracts employees, plans, period groups, plan payout dates, employee assumptions (targets), payout snapshot exports, and report model worksheets — including unlocked mid-period data when available (`locked_only=false`).
 
 ## Auth
 
@@ -25,7 +25,7 @@ Header sent: `Authorization: Token <value>` against `https://api.captivateiq.com
 | `plans` | Full refresh | `active_plans_only` (default true) | Config dimension |
 | `period_groups` | Full refresh | — | Config dimension |
 | `employee_assumptions` | Windowed | `start_date` or lookback/lookahead date filters | Targets/quotas in `data` |
-| `payout_dates` | Full refresh | — | Catalog used to select exports |
+| `payout_dates` | Full refresh | — | Plan payout dates. Join `plans.payout_dates[].id` to `id`. Export selection still calls the snapshot endpoint inside the tap |
 | `payout_worksheets_catalog` | Windowed | Recent payout dates (max 5 queried) | Sheet names for calc exports |
 | `payout_summaries` | Date-windowed + state | Bookmark synced dates; **always re-export latest** (MTD mutates) | **Beta.** Async CSV; max 5 dates/request |
 | `payout_worksheet_exports` | Date-windowed + state | Same as summaries; requires `worksheet_names` | **Beta.** Calc detail / attainment columns |

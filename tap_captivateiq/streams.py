@@ -228,14 +228,20 @@ class EmployeeAssumptionsStream(CaptivateIQStream):
 
 
 class PayoutDatesStream(CaptivateIQStream):
-    """Known payout snapshot dates (catalog for export selection)."""
+    """Plan payout dates. Join ``plans.payout_dates[].id`` to ``id``."""
 
     name = "payout_dates"
-    path = f"{API_PREFIX}/payouts/payout-dates/"
-    primary_keys = ("payout_date",)
+    path = f"{API_PREFIX}/payout-dates/"
+    primary_keys = ("id",)
     replication_key = None
     schema = th.PropertiesList(
-        th.Property("payout_date", th.DateType),
+        th.Property("object", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("period_group", th.StringType),
+        th.Property("plan", th.StringType),
+        th.Property("date", th.DateType),
+        th.Property("created_at", th.DateTimeType),
+        th.Property("updated_at", th.DateTimeType),
     ).to_dict()
 
 
