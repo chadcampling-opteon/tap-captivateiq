@@ -2,7 +2,7 @@
 
 Singer tap for [CaptivateIQ](https://www.captivateiq.com/) commissions data, built with the [Meltano Singer SDK](https://sdk.meltano.com/).
 
-Extracts employees, plans, period groups, plan payout dates, employee assumptions (targets), payout snapshot exports, and report model worksheets — including unlocked mid-period data when available (`locked_only=false`).
+Extracts employees, hierarchy groups and reporting edges, plans, period groups, plan payout dates, employee assumptions (targets), payout snapshot exports, and report model worksheets — including unlocked mid-period data when available (`locked_only=false`).
 
 ## Auth
 
@@ -22,6 +22,8 @@ Header sent: `Authorization: Token <value>` against `https://api.captivateiq.com
 | Stream | Mode | Window / state | Notes |
 |--------|------|----------------|-------|
 | `employees` | Full refresh | — | Small roster; has `updated_at` but no server `updated_after` filter |
+| `hierarchy_groups` | Full refresh | — | Groups that contain reporting edges. The `default` field is the API name |
+| `hierarchies` | Full refresh | one partition per group | Reporting edges. Join `managing_employee` and `reporting_employee` to `employees.id`. Includes ended edges (`end_date` set). Quote `hierarchy_groups.default` in SQL |
 | `plans` | Full refresh | `active_plans_only` (default true) | Config dimension |
 | `period_groups` | Full refresh | — | Config dimension |
 | `employee_assumptions` | Windowed | `start_date` or lookback/lookahead date filters | Targets/quotas in `data` |

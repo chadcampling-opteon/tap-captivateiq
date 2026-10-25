@@ -11,6 +11,8 @@ from singer_sdk.exceptions import ConfigValidationError
 from tap_captivateiq.client import CaptivateIQPaginator
 from tap_captivateiq.streams import (
     EmployeesStream,
+    HierarchiesStream,
+    HierarchyGroupsStream,
     PayoutDatesStream,
     PayoutSummariesStream,
     _parse_start_date,
@@ -51,6 +53,8 @@ def test_discover_stream_names() -> None:
     tap = TapCaptivateIQ(config=SAMPLE_CONFIG)
     names = sorted(s.name for s in tap.discover_streams())
     assert "employees" in names
+    assert "hierarchy_groups" in names
+    assert "hierarchies" in names
     assert "payout_summaries" in names
     assert "report_models" in names
     assert "employee_assumptions" in names
@@ -64,6 +68,41 @@ def test_paginator_relative_next() -> None:
     response.url = "https://api.captivateiq.com/ciq/v1/employees/?limit=50"
     url = paginator.get_next_url(response)
     assert url == "https://api.captivateiq.com/ciq/v1/employees/?limit=50&offset=50"
+
+
+def test_hierarchy_streams() -> None:
+    tap = TapCaptivateIQ(config=SAMPLE_CONFIG)
+    groups = HierarchyGroupsStream(tap)
+    edges = HierarchiesStream(tap)
+    assert groups.path == "/ciq/v1/hierarchy-groups/"
+    assert groups.primary_keys == ("id",)
+    assert groups.replication_key is None
+    assert set(groups.schema["properties"]) == {
+        "object",
+        "id",
+        "name",
+        "default",
+        "created_at",
+        "updated_at",
+    }
+    assert edges.parent_stream_type is HierarchyGroupsStream
+    assert edges.path == "/ciq/v1/hierarchy-groups/{hierarchy_group_id}/hierarchies/"
+    assert edges.primary_keys == ("id",)
+    assert edges.replication_key is None
+    assert set(edges.schema["properties"]) == {
+        "object",
+        "id",
+        "hierarchy_group",
+        "managing_employee",
+        "reporting_employee",
+        "start_date",
+        "end_date",
+        "created_at",
+        "updated_at",
+    }
+    assert groups.get_child_context({"id": "group-1"}, None) == {
+        "hierarchy_group_id": "group-1",
+    }
 
 
 def test_employees_url_base() -> None:
