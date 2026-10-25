@@ -158,6 +158,8 @@ class TapCaptivateIQ(Tap):
         """Return a list of discovered streams."""
         return [
             streams.EmployeesStream(self),
+            streams.HierarchyGroupsStream(self),
+            streams.HierarchiesStream(self),
             streams.PlansStream(self),
             streams.PeriodGroupsStream(self),
             streams.EmployeeAssumptionsStream(self),

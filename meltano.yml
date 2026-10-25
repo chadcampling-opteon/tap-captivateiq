@@ -19,6 +19,8 @@ plugins:
 
     select:
     - employees.*
+    - hierarchy_groups.*
+    - hierarchies.*
     - plans.*
     - period_groups.*
     - payout_dates.*

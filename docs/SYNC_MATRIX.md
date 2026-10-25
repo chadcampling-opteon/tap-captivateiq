@@ -5,6 +5,8 @@
 | Stream | Sync mode | State / window | Expected requests / typical run |
 |--------|-----------|----------------|---------------------------------|
 | `employees` | Full refresh | none | `ceil(n/100)` list pages |
+| `hierarchy_groups` | Full refresh | none | 1–few pages. `GET /ciq/v1/hierarchy-groups/` |
+| `hierarchies` | Full refresh | one list per hierarchy group | Pages per group. Join `managing_employee` and `reporting_employee` to `employees.id`. Includes ended edges |
 | `plans` | Full refresh | `is_active=true` by default | 1–few pages |
 | `period_groups` | Full refresh | none | 1–few pages |
 | `employee_assumptions` | Windowed | `end_date_after` / `start_date_before` from `start_date` or lookback | pages for current window only |

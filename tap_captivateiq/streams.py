@@ -121,6 +121,82 @@ class EmployeesStream(CaptivateIQStream):
     ).to_dict()
 
 
+class HierarchyGroupsStream(CaptivateIQStream):
+    """Hierarchy groups that contain reporting edges."""
+
+    name = "hierarchy_groups"
+    path = f"{API_PREFIX}/hierarchy-groups/"
+    primary_keys = ("id",)
+    replication_key = None
+    schema = th.PropertiesList(
+        th.Property("object", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("name", th.StringType),
+        th.Property(
+            "default",
+            th.BooleanType,
+            description="Whether this group is the organization's default hierarchy group",
+        ),
+        th.Property("created_at", th.DateTimeType),
+        th.Property("updated_at", th.DateTimeType),
+    ).to_dict()
+
+    @override
+    def get_child_context(
+        self,
+        record: dict,
+        context: Context | None,
+    ) -> dict:
+        """Pass the group id into the hierarchies child path.
+
+        Args:
+            record: Hierarchy group record.
+            context: Parent partition context. Unused; each group is its own partition.
+
+        Returns:
+            Context containing ``hierarchy_group_id`` for the child path.
+        """
+        return {"hierarchy_group_id": record["id"]}
+
+
+class HierarchiesStream(CaptivateIQStream):
+    """Reporting edges inside a hierarchy group.
+
+    Join ``managing_employee`` and ``reporting_employee`` to ``employees.id``.
+    Join ``hierarchy_group`` to ``hierarchy_groups.id``. ``start_date`` and
+    ``end_date`` bound when the edge is effective, including ended relationships.
+    """
+
+    name = "hierarchies"
+    parent_stream_type = HierarchyGroupsStream
+    path = f"{API_PREFIX}/hierarchy-groups/{{hierarchy_group_id}}/hierarchies/"
+    primary_keys = ("id",)
+    replication_key = None
+    schema = th.PropertiesList(
+        th.Property("object", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property(
+            "hierarchy_group",
+            th.StringType,
+            description="Hierarchy group UUID. Join to hierarchy_groups.id",
+        ),
+        th.Property(
+            "managing_employee",
+            th.StringType,
+            description="Manager employee UUID. Join to employees.id",
+        ),
+        th.Property(
+            "reporting_employee",
+            th.StringType,
+            description="Direct report employee UUID. Join to employees.id",
+        ),
+        th.Property("start_date", th.DateType),
+        th.Property("end_date", th.DateType),
+        th.Property("created_at", th.DateTimeType),
+        th.Property("updated_at", th.DateTimeType),
+    ).to_dict()
+
+
 class PlansStream(CaptivateIQStream):
     """Commission plans."""
 
